@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1055203773651-7ocs3orv9lgg08rfuj593clb3pjqmikd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.coffepitstop",
+            "certificate_hash": "35913ff30f0f5d6c372d118514ab7bd8c7296191"
+          }
+        },
+        {
           "client_id": "1055203773651-2oi9bud871u4h8jfbno4rfli6abkuif8.apps.googleusercontent.com",
           "client_type": 3
         }
