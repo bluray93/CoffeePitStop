@@ -29,5 +29,8 @@ dependencies {
     implementation 'com.android.support:wear:28.0.0'
     implementation 'com.google.firebase:firebase-core:+'
     implementation 'com.google.firebase:firebase-messaging:+'
+    implementation 'com.amazonaws:aws-android-sdk-sns:2.+'
+    implementation 'com.amazonaws:aws-android-sdk-cognito:2.+'
+
     compileOnly 'com.google.android.wearable:wearable:2.4.0'
 }
