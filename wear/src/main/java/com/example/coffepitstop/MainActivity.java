@@ -1,6 +1,7 @@
 package com.example.coffepitstop;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -90,6 +91,13 @@ public class MainActivity extends WearableActivity {
             }
         });
 
+        final Button button2 = findViewById(R.id.settings);
+        button2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                topicsSubscriptions(v);
+            }
+        });
+
     }
 
     private String retrieveEndpointArn() {
@@ -143,5 +151,11 @@ public class MainActivity extends WearableActivity {
         } else
             Log.d("ENDPOINT","Endpoint already existing.");
 
+    }
+
+    /** Called when the user taps the Settings button */
+    public void topicsSubscriptions(View view) {
+        Intent intent = new Intent(this, TopicsSubscriptions.class);
+        startActivity(intent);
     }
 }
