@@ -1,44 +1,37 @@
 package com.example.coffepitstop;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class TopicsSubscriptions extends WearableActivity {
+public class Confirmation extends WearableActivity {
 
-    private EditText editTextTS;
+    private TextView textViewC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_topics_subscriptions);
+        setContentView(R.layout.activity_confirmation);
 
-        editTextTS = (EditText) findViewById(R.id.editTextTS);
+        textViewC = (TextView) findViewById(R.id.TextViewC);
 
         // Enables Always-on
         setAmbientEnabled();
 
-        final ImageButton accept = findViewById(R.id.acceptTS);
+        final ImageButton accept = findViewById(R.id.acceptC);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Confirmation(v);
+                //fai cose
             }
         });
 
-        final ImageButton deny = findViewById(R.id.denyTS);
+        final ImageButton deny = findViewById(R.id.denyC);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 finish();
             }
         });
-    }
-
-    public void Confirmation(View view) {
-        Intent intent = new Intent(this, Confirmation.class);
-        startActivity(intent);
     }
 }

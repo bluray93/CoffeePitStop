@@ -6,4 +6,5 @@
     -->
     <string name="hello_world">Hello Square World!</string>
     <string name="title_activity_topics_subscriptions">topics_subscriptions</string>
+    <string name="title_activity_confirmation">Confirmation</string>
 </resources>

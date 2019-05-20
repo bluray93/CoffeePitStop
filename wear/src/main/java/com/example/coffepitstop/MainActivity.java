@@ -103,8 +103,8 @@ public class MainActivity extends WearableActivity {
             }
         });
 
-        final ImageButton button2 = findViewById(R.id.settings);
-        button2.setOnClickListener(new View.OnClickListener() {
+        final ImageButton settings = findViewById(R.id.settings);
+        settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 topicsSubscriptions(v);
             }

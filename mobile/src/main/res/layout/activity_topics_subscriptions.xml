@@ -13,7 +13,7 @@
 
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/AcceptTS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="28dp"
@@ -24,7 +24,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/DenyTS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -35,10 +35,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/imageButton" />
+            app:layout_constraintStart_toEndOf="@+id/AcceptTS" />
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/editTextTS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -51,7 +51,7 @@
             android:textColor="@color/white"
             android:inputType="text"
 
-            app:layout_constraintBottom_toTopOf="@+id/imageButton2"
+            app:layout_constraintBottom_toTopOf="@+id/DenyTS"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"

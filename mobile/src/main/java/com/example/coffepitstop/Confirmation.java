@@ -1,45 +1,38 @@
 package com.example.coffepitstop;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
-public class TopicsSubscriptions extends AppCompatActivity {
+public class Confirmation extends AppCompatActivity {
 
-    private EditText editTextTS;
+    private TextView textViewC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_topics_subscriptions);
+        setContentView(R.layout.activity_confirmation);
 
-        editTextTS = (EditText) findViewById(R.id.editTextTS);
+        textViewC = (TextView) findViewById(R.id.TextViewC);
 
-        final ImageButton accept = findViewById(R.id.AcceptTS);
+        final ImageButton accept = findViewById(R.id.AcceptC);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Confirmation(v);
+                //fai cose
             }
         });
 
-        final ImageButton deny = findViewById(R.id.DenyTS);
+        final ImageButton deny = findViewById(R.id.DenyC);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 finish();
             }
         });
-
-    }
-
-    public void Confirmation(View view) {
-        Intent intent = new Intent(this, Confirmation.class);
-        startActivity(intent);
     }
 
 }

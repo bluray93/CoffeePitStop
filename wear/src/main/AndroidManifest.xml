@@ -29,6 +29,15 @@
             android:value="true" />
 
         <activity
+            android:name=".Confirmation"
+            android:label="@string/title_activity_confirmation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TopicsSubscriptions"
             android:label="@string/title_activity_topics_subscriptions">
             <intent-filter>
