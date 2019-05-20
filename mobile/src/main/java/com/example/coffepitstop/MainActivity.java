@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PUSH_SETTINGS_KEY = "PushController.PUSH_SETTINGS_KEY";
     private CognitoCredentialsProvider credentialsProvider;
     private AWSSessionCredentials awsSessionCredentials;
-    private AmazonSNSClient snsClient;
+    private static AmazonSNSClient snsClient;
     private String token;
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
@@ -208,7 +208,16 @@ public class MainActivity extends AppCompatActivity {
     /** Called when the user taps the Settings button */
     public void topicsSubscriptions(View view) {
         Intent intent = new Intent(this, TopicsSubscriptions.class);
+
+        intent.putExtra("endpointArn", retrieveEndpointArn());
+        Log.d("CLIENT MAIN",snsClient.getEndpoint());
+
         startActivity(intent);
     }
+
+    public static AmazonSNSClient getSnsClient(){
+        return snsClient;
+    }
+
 
 }
