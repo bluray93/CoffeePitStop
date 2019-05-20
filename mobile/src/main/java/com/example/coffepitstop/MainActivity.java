@@ -1,6 +1,7 @@
 package com.example.coffepitstop;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.amazonaws.auth.AWSSessionCredentials;
 import com.amazonaws.auth.CognitoCredentialsProvider;
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        final Button button = findViewById(R.id.button);
+        final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("BUTTON", "Premuto");
@@ -96,6 +98,13 @@ public class MainActivity extends AppCompatActivity {
 
                 // Print the MessageId of the message.
                 System.out.println("MessageId: " + publishResponse.getMessageId());
+            }
+        });
+
+        final ImageButton button2 = findViewById(R.id.settings);
+        button2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                topicsSubscriptions(v);
             }
         });
 
@@ -194,6 +203,12 @@ public class MainActivity extends AppCompatActivity {
             snsClient.setEndpointAttributes(saeReq);
         }
 
+    }
+
+    /** Called when the user taps the Settings button */
+    public void topicsSubscriptions(View view) {
+        Intent intent = new Intent(this, TopicsSubscriptions.class);
+        startActivity(intent);
     }
 
 }

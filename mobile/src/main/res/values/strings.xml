@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CoffePitStop</string>
+    <string name="title_activity_topics_subscriptions">TopicsSubscriptions</string>
 </resources>
