@@ -17,11 +17,11 @@
         <activity
             android:name=".Confirmation"
             android:label="@string/title_activity_confirmation"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" />
         <activity
             android:name=".TopicsSubscriptions"
             android:label="@string/title_activity_topics_subscriptions"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
