@@ -16,28 +16,36 @@ import android.widget.Toast;
 
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.SubscribeRequest;
+import com.amazonaws.services.sns.model.UnsubscribeRequest;
 
 public class Settings extends AppCompatActivity {
     private TextView textViewS;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Intent intent = getIntent();
 
         textViewS = (TextView) findViewById(R.id.TextViewS);
 
         textViewS.setText("Do you want\nto unsubscribe?");
 
+        final Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 
         final ImageButton accept = findViewById(R.id.AcceptS);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //fai cose
+                UnsubscribeRequest unsubscribeRequest = new UnsubscribeRequest(Util.getSharedPreferences("subscriptionArn",getApplicationContext()));
+                MainActivity.getSnsClient().unsubscribe(unsubscribeRequest);
+                Log.d("Unsubscribe","Unsibscribed");
 
+                //Delete shared preferences
 
+                Util.deleteSharedPreferences("subscriptionArn",getApplicationContext());
+                Util.deleteSharedPreferences("topicName",getApplicationContext());
+
+                startActivity(intent);
             }
+
         });
 
         final ImageButton deny = findViewById(R.id.DenyS);

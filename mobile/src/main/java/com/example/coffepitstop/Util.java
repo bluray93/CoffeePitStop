@@ -20,4 +20,9 @@ public class Util {
         return sharedPreferences.getString(key,null);
 
     }
+
+    static void deleteSharedPreferences(String key, Context applicationContext){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+        sharedPreferences.edit().remove(key).apply();
+    }
 }

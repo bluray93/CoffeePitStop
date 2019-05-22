@@ -85,7 +85,10 @@ public class TopicsSubscriptions extends AppCompatActivity {
             //If the topic does not exists the NotFoundException is thrown
 
             final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", Util.getSharedPreferences("endpointArn",getApplicationContext()));
-            snsClient.subscribe(subscribeRequest);
+
+            SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
+            Log.d("SubARN",subscribeResult.getSubscriptionArn());
+            Util.storeSharedPreferences("subscriptionArn",subscribeResult.getSubscriptionArn(),getApplicationContext());
             Log.d("SUBSCRIBE RESULT", "Subscribe done");
             return true;
 
@@ -93,7 +96,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
         } catch (com.amazonaws.services.sns.model.NotFoundException e){
 
             //In this case, the topic with the initial name is created
-            createTopic(topicName);
+            //createTopic(topicName);
             Log.d("SUBSCRIBE RESULT", "CreateTopic done");
 
             return false;
