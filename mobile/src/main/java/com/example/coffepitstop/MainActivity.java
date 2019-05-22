@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
     private String topicName;
+    private Boolean subscribed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(sharedPreferences.contains("topicName")){
             topicName = sharedPreferences.getString("topicName",null);
+            subscribed = true;
             Log.d("TOPICNAME",topicName);
         }
         else{
@@ -115,7 +117,10 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                topicsSubscriptions(v);
+                if (subscribed)
+                    settings(v);
+                else
+                    topicsSubscriptions(v);
             }
         });
 
@@ -222,6 +227,15 @@ public class MainActivity extends AppCompatActivity {
 
         intent.putExtra("endpointArn", retrieveEndpointArn());
         Log.d("CLIENT MAIN",snsClient.getEndpoint());
+
+        startActivity(intent);
+    }
+
+    public void settings(View view) {
+        Intent intent = new Intent(this, Settings.class);
+
+        //intent.putExtra("endpointArn", retrieveEndpointArn());
+        //Log.d("CLIENT MAIN",snsClient.getEndpoint());
 
         startActivity(intent);
     }

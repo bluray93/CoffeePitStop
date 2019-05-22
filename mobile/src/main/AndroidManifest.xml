@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".Settings"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".Confirmation"
             android:label="@string/title_activity_confirmation"
             android:theme="@style/Theme.Design.NoActionBar" />
