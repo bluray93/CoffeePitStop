@@ -31,7 +31,8 @@ public class Confirmation extends AppCompatActivity {
         final Boolean subscriptionResult = intent.getBooleanExtra("subscriptionResult",true);
         final String topicArnPrefix = intent.getStringExtra("topicArnPrefix");
         final String topicName = intent.getStringExtra("topicName");
-        final String endpointArn = intent.getStringExtra("endpointArn");
+        final String endpointArn = Util.getSharedPreferences("endpointArn",getApplicationContext());
+
         textViewC = (TextView) findViewById(R.id.TextViewC);
 
         if (subscriptionResult)
@@ -39,7 +40,7 @@ public class Confirmation extends AppCompatActivity {
         else
             textViewC.setText("Group not found.\nCreate Group?");
 
-        
+
         final ImageButton accept = findViewById(R.id.AcceptC);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

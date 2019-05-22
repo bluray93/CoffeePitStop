@@ -38,8 +38,6 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
 
-    private static final String PUSH_SETTINGS = "PushController.PUSH_SETTINGS";
-    private static final String PUSH_SETTINGS_KEY = "PushController.PUSH_SETTINGS_KEY";
     private CognitoCredentialsProvider credentialsProvider;
     private AWSSessionCredentials awsSessionCredentials;
     private static AmazonSNSClient snsClient;
@@ -126,19 +124,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private String retrieveEndpointArn() {
-        final SharedPreferences sharedPreferences =
-                this.getSharedPreferences(PUSH_SETTINGS, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(PUSH_SETTINGS_KEY, null);
-    }
-
-    private void storeEndpointArn(String endpointArn) {
-        final SharedPreferences.Editor sharedPreferencesEditor =
-                this.getSharedPreferences(PUSH_SETTINGS, Context.MODE_PRIVATE).edit();
-        sharedPreferencesEditor.putString(PUSH_SETTINGS_KEY, endpointArn).apply();
-    }
-
-
     private void createEndpoint(){
         platformEndpointRequest = new CreatePlatformEndpointRequest();
         platformEndpointRequest.setCustomUserData("CoffeePitStopUser");
@@ -147,8 +132,9 @@ public class MainActivity extends AppCompatActivity {
         platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
 
         //We store the newly created endpoint
-        storeEndpointArn(platformEndpointResult.getEndpointArn());
+        //storeEndpointArn(platformEndpointResult.getEndpointArn());
 
+        Util.storeSharedPreferences("endpointArn",platformEndpointResult.getEndpointArn(),getApplicationContext());
 
         Log.d("ENDPOINT", "Endpoint created " + platformEndpointResult.getEndpointArn());
 
@@ -179,8 +165,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void snsSetup(){
 
-        String endpointARN = retrieveEndpointArn();
+        //String endpointARN = retrieveEndpointArn();
 
+        String endpointARN = Util.getSharedPreferences("endpointArn",getApplicationContext());
         Boolean toUpdate = false;
 
         Log.d("ENDPOINT","is "+ endpointARN);
@@ -225,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
     public void topicsSubscriptions(View view) {
         Intent intent = new Intent(this, TopicsSubscriptions.class);
 
-        intent.putExtra("endpointArn", retrieveEndpointArn());
+        intent.putExtra("endpointArn", Util.getSharedPreferences("endpointArn",getApplicationContext()));
         Log.d("CLIENT MAIN",snsClient.getEndpoint());
 
         startActivity(intent);

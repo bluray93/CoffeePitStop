@@ -21,9 +21,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
     private EditText editTextTS;
     private AmazonSNSClient snsClient;
-    private static final String PUSH_SETTINGS = "PushController.PUSH_SETTINGS";
-    private static final String PUSH_SETTINGS_KEY = "PushController.PUSH_SETTINGS_KEY";
-    private String endpointArn;
     private String topicName;
 
     private String topicArnPrefix = "arn:aws:sns:us-east-1:341434091225:";
@@ -33,10 +30,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
         setContentView(R.layout.activity_topics_subscriptions);
 
         //TODO: retrieve client from intent
-
-        Intent intent = getIntent();
-
-        endpointArn = intent.getStringExtra("endpointArn");
 
         snsClient = MainActivity.getSnsClient();
 
@@ -73,7 +66,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
         intent.putExtra("subscriptionResult",result);
         intent.putExtra("topicArnPrefix",topicArnPrefix);
         intent.putExtra("topicName", topicName);
-        intent.putExtra("endpointArn",endpointArn);
 
         startActivity(intent);
     }
@@ -92,7 +84,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
             //Tries to subscribe to the topic with the given name
             //If the topic does not exists the NotFoundException is thrown
 
-            final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", retrieveEndpointArn());
+            final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", Util.getSharedPreferences("endpointArn",getApplicationContext()));
             snsClient.subscribe(subscribeRequest);
             Log.d("SUBSCRIBE RESULT", "Subscribe done");
             return true;
@@ -108,12 +100,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
         }
 
 
-    }
-
-    private String retrieveEndpointArn() {
-        final SharedPreferences sharedPreferences =
-                this.getSharedPreferences(PUSH_SETTINGS, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(PUSH_SETTINGS_KEY, null);
     }
 
 
