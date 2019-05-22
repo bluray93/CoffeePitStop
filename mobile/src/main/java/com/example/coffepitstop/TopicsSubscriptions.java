@@ -71,7 +71,8 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
         Intent intent = new Intent(this, Confirmation.class);
         intent.putExtra("subscriptionResult",result);
-        intent.putExtra("topicArn",topicArnPrefix + topicName);
+        intent.putExtra("topicArnPrefix",topicArnPrefix);
+        intent.putExtra("topicName", topicName);
         intent.putExtra("endpointArn",endpointArn);
 
         startActivity(intent);

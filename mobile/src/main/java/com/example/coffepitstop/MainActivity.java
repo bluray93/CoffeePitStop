@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,11 +46,23 @@ public class MainActivity extends AppCompatActivity {
     private String token;
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
+    private String topicName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        if(sharedPreferences.contains("topicName")){
+            topicName = sharedPreferences.getString("topicName",null);
+            Log.d("TOPICNAME",topicName);
+        }
+        else{
+            Log.d("TOPICNAME","non ci sono");
+        }
 
         if( Build.VERSION.SDK_INT >= 9){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -87,8 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("BUTTON", "Premuto");
                 // Code here executes on main thread after user presses button
 
-                //TODO: topic arn is hardcoded for the moment. Needs to be replaced
-                String topicArn = "arn:aws:sns:us-east-1:341434091225:Arg1";
+                String topicArn = "arn:aws:sns:us-east-1:341434091225:"+topicName;
                 // Publish a message to an Amazon SNS topic.
                 final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
 
@@ -100,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("MessageId: " + publishResponse.getMessageId());
             }
         });
-
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
