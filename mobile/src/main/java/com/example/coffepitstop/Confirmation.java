@@ -39,20 +39,15 @@ public class Confirmation extends AppCompatActivity {
         else
             textViewC.setText("Group not found.\nCreate Group?");
 
-
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
+        
         final ImageButton accept = findViewById(R.id.AcceptC);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //fai cose
                 if (subscriptionResult) {
+
                     Toast.makeText(getBaseContext(), "Sub. Success.", Toast.LENGTH_LONG).show();
-                    storeTopicName(topicName);
-
-                    String tN = sharedPreferences.getString("topicName",null);
-                        Log.d("TOPICNAME",tN);
-
+                    Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
                     startActivity(returnBtn);
                 }
 
@@ -68,7 +63,7 @@ public class Confirmation extends AppCompatActivity {
                         snsClient.subscribe(subscribeRequest);
                         Log.d("SUBSCRIBE RESULT", "Subscribe done");
                         Toast.makeText(getBaseContext(),"Group created.",Toast.LENGTH_LONG).show();
-                        storeTopicName(topicName);
+                        Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
                         startActivity(returnBtn);
 
                     } catch (com.amazonaws.services.sns.model.NotFoundException e){
@@ -90,13 +85,5 @@ public class Confirmation extends AppCompatActivity {
         });
     }
 
-    private void storeTopicName(String topicName) {
-        Log.d("storeTopicName","sono dentro");
-        //SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("topicName", topicName);
-        editor.apply();
-    }
 
 }

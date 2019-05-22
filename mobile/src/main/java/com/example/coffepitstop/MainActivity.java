@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if(sharedPreferences.contains("topicName")){
-            topicName = sharedPreferences.getString("topicName",null);
+            topicName = Util.getSharedPreferences("topicName",getApplicationContext());
             subscribed = true;
             Log.d("TOPICNAME",topicName);
         }
