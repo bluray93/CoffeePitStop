@@ -24,6 +24,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
     private static final String PUSH_SETTINGS = "PushController.PUSH_SETTINGS";
     private static final String PUSH_SETTINGS_KEY = "PushController.PUSH_SETTINGS_KEY";
     private String endpointArn;
+    private String topicName;
 
     private String topicArnPrefix = "arn:aws:sns:us-east-1:341434091225:";
     @Override
@@ -46,13 +47,13 @@ public class TopicsSubscriptions extends AppCompatActivity {
         final ImageButton accept = findViewById(R.id.AcceptTS);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String topicName = editTextTS.getText().toString();
+                topicName = editTextTS.getText().toString();
 
                 if (topicName.equals(""))
                     Log.d("TOPIC CREATION", "Empty topic name");
                 else {
-                    subscribeTopic(topicName);
-                    Confirmation(v);
+                    Boolean result = subscribeTopic(topicName);
+                    Confirmation(v,result);
                 }
             }
         });
@@ -66,8 +67,13 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
     }
 
-    public void Confirmation(View view) {
+    public void Confirmation(View view,Boolean result) {
+
         Intent intent = new Intent(this, Confirmation.class);
+        intent.putExtra("subscriptionResult",result);
+        intent.putExtra("topicArn",topicArnPrefix + topicName);
+        intent.putExtra("endpointArn",endpointArn);
+
         startActivity(intent);
     }
 
@@ -78,7 +84,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
         Log.d("CREATE TOPIC", createTopicResult.getTopicArn());
     }
 
-    private void subscribeTopic(String topicName){
+    private boolean subscribeTopic(String topicName){
 
         try {
 
@@ -88,6 +94,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
             final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", retrieveEndpointArn());
             snsClient.subscribe(subscribeRequest);
             Log.d("SUBSCRIBE RESULT", "Subscribe done");
+            return true;
 
 
         } catch (com.amazonaws.services.sns.model.NotFoundException e){
@@ -96,7 +103,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
             createTopic(topicName);
             Log.d("SUBSCRIBE RESULT", "CreateTopic done");
 
-
+            return false;
         }
 
 
