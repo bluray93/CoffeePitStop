@@ -30,6 +30,7 @@ public class Confirmation extends WearableActivity {
 
         Intent intent = getIntent();
         final Intent returnBtn = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         final Boolean subscriptionResult = intent.getBooleanExtra("subscriptionResult",true);
         final String topicArnPrefix = intent.getStringExtra("topicArnPrefix");
@@ -52,7 +53,8 @@ public class Confirmation extends WearableActivity {
 
                     Toast.makeText(getBaseContext(), "Sub. Success.", Toast.LENGTH_LONG).show();
                     Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
-                    startActivity(returnBtn);
+                    //startActivity(returnBtn);
+                    finish();
                 }
 
                 else{
@@ -71,7 +73,8 @@ public class Confirmation extends WearableActivity {
                         Toast.makeText(getBaseContext(),"Group created.",Toast.LENGTH_LONG).show();
                         Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
                         Util.storeSharedPreferences("subscriptionArn",subscribeResult.getSubscriptionArn(),getApplicationContext());
-                        startActivity(returnBtn);
+                        //startActivity(returnBtn);
+                        finish();
 
                     } catch (com.amazonaws.services.sns.model.NotFoundException e){
 

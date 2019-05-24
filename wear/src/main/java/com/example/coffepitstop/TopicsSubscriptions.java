@@ -46,6 +46,7 @@ public class TopicsSubscriptions extends WearableActivity {
                 else {
                     Boolean result = subscribeTopic(topicName);
                     Confirmation(v,result);
+                    finish();
                 }
             }
         });

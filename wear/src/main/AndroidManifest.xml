@@ -30,13 +30,16 @@
 
         <activity
             android:name=".Settings"
+            android:noHistory="true"
             android:label="title_activity_settings">
         </activity>
         <activity
             android:name=".Confirmation"
+            android:noHistory="true"
             android:label="confirmation"/>
         <activity
             android:name=".TopicsSubscriptions"
+            android:noHistory="true"
             android:label="@string/title_activity_topics_subscriptions"/>
         <activity
             android:name=".MainActivity"

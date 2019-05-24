@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.wear.widget.SwipeDismissFrameLayout;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
@@ -38,7 +39,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends WearableActivity {
+public class MainActivity extends WearableActivity{
 
     private CognitoCredentialsProvider credentialsProvider;
     private AWSSessionCredentials awsSessionCredentials;
@@ -48,6 +49,7 @@ public class MainActivity extends WearableActivity {
     private CreatePlatformEndpointResult platformEndpointResult;
     private String topicName;
     private Boolean subscribed = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +121,7 @@ public class MainActivity extends WearableActivity {
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (subscribed)
+                if (sharedPreferences.contains("topicName"))
                     settings(v);
                 else
                     topicsSubscriptions(v);
@@ -215,7 +217,6 @@ public class MainActivity extends WearableActivity {
     /** Called when the user taps the Settings button */
     public void topicsSubscriptions(View view) {
         Intent intent = new Intent(this, TopicsSubscriptions.class);
-
         intent.putExtra("endpointArn", Util.getSharedPreferences("endpointArn",getApplicationContext()));
         Log.d("CLIENT MAIN",snsClient.getEndpoint());
 

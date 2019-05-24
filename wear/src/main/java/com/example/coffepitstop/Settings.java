@@ -39,7 +39,8 @@ public class Settings extends WearableActivity {
                 Util.deleteSharedPreferences("subscriptionArn",getApplicationContext());
                 Util.deleteSharedPreferences("topicName",getApplicationContext());
 
-                startActivity(intent);
+                //startActivity(intent);
+                finish();
             }
 
         });
