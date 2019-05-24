@@ -70,13 +70,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void createTopic(String topicName){
-        final CreateTopicRequest createTopicRequest = new CreateTopicRequest(topicName);
-        final CreateTopicResult createTopicResult = snsClient.createTopic(createTopicRequest);
-
-        Log.d("CREATE TOPIC", createTopicResult.getTopicArn());
-    }
-
     private boolean subscribeTopic(String topicName){
 
         try {
@@ -101,9 +94,5 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
             return false;
         }
-
-
     }
-
-
 }

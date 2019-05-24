@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
@@ -39,19 +40,33 @@ import java.util.Map;
 
 public class MainActivity extends WearableActivity {
 
-    private static final String PUSH_SETTINGS = "PushController.PUSH_SETTINGS";
-    private static final String PUSH_SETTINGS_KEY = "PushController.PUSH_SETTINGS_KEY";
     private CognitoCredentialsProvider credentialsProvider;
     private AWSSessionCredentials awsSessionCredentials;
-    private AmazonSNSClient snsClient;
+    private static AmazonSNSClient snsClient;
     private String token;
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
+    private String topicName;
+    private Boolean subscribed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Enables Always-on
+        setAmbientEnabled();
+
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        if(sharedPreferences.contains("topicName")){
+            topicName = Util.getSharedPreferences("topicName",getApplicationContext());
+            subscribed = true;
+            Log.d("TOPICNAME",topicName);
+        }
+        else{
+            Log.d("TOPICNAME","non ci sono");
+        }
 
         if( Build.VERSION.SDK_INT >= 9){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -89,8 +104,7 @@ public class MainActivity extends WearableActivity {
                 Log.d("BUTTON", "Premuto");
                 // Code here executes on main thread after user presses button
 
-                //TODO: topic arn is hardcoded for the moment. Needs to be replaced
-                String topicArn = "arn:aws:sns:us-east-1:341434091225:Arg1";
+                String topicArn = "arn:aws:sns:us-east-1:341434091225:"+topicName;
                 // Publish a message to an Amazon SNS topic.
                 final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
 
@@ -102,28 +116,17 @@ public class MainActivity extends WearableActivity {
                 System.out.println("MessageId: " + publishResponse.getMessageId());
             }
         });
-
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                topicsSubscriptions(v);
+                if (subscribed)
+                    settings(v);
+                else
+                    topicsSubscriptions(v);
             }
         });
 
     }
-
-    private String retrieveEndpointArn() {
-        final SharedPreferences sharedPreferences =
-                this.getSharedPreferences(PUSH_SETTINGS, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(PUSH_SETTINGS_KEY, null);
-    }
-
-    private void storeEndpointArn(String endpointArn) {
-        final SharedPreferences.Editor sharedPreferencesEditor =
-                this.getSharedPreferences(PUSH_SETTINGS, Context.MODE_PRIVATE).edit();
-        sharedPreferencesEditor.putString(PUSH_SETTINGS_KEY, endpointArn).apply();
-    }
-
 
     private void createEndpoint(){
         platformEndpointRequest = new CreatePlatformEndpointRequest();
@@ -133,8 +136,9 @@ public class MainActivity extends WearableActivity {
         platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
 
         //We store the newly created endpoint
-        storeEndpointArn(platformEndpointResult.getEndpointArn());
+        //storeEndpointArn(platformEndpointResult.getEndpointArn());
 
+        Util.storeSharedPreferences("endpointArn",platformEndpointResult.getEndpointArn(),getApplicationContext());
 
         Log.d("ENDPOINT", "Endpoint created " + platformEndpointResult.getEndpointArn());
 
@@ -165,8 +169,9 @@ public class MainActivity extends WearableActivity {
 
     private void snsSetup(){
 
-        String endpointARN = retrieveEndpointArn();
+        //String endpointARN = retrieveEndpointArn();
 
+        String endpointARN = Util.getSharedPreferences("endpointArn",getApplicationContext());
         Boolean toUpdate = false;
 
         Log.d("ENDPOINT","is "+ endpointARN);
@@ -210,6 +215,24 @@ public class MainActivity extends WearableActivity {
     /** Called when the user taps the Settings button */
     public void topicsSubscriptions(View view) {
         Intent intent = new Intent(this, TopicsSubscriptions.class);
+
+        intent.putExtra("endpointArn", Util.getSharedPreferences("endpointArn",getApplicationContext()));
+        Log.d("CLIENT MAIN",snsClient.getEndpoint());
+
         startActivity(intent);
     }
+
+    public void settings(View view) {
+        Intent intent = new Intent(this, Settings.class);
+
+        //intent.putExtra("endpointArn", retrieveEndpointArn());
+        //Log.d("CLIENT MAIN",snsClient.getEndpoint());
+
+        startActivity(intent);
+    }
+
+    public static AmazonSNSClient getSnsClient(){
+        return snsClient;
+    }
 }
+

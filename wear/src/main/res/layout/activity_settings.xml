@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    tools:context=".Settings">
+    android:background="@color/dark_grey"
+    android:padding="@dimen/box_inset_layout_padding"
+    tools:context=".Settings"
+    tools:deviceIds="wear">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -19,7 +21,7 @@
             android:layout_marginStart="28dp"
             android:layout_marginBottom="28dp"
             android:background="@drawable/circle_button"
-            android:src="@drawable/ic_check"
+            android:src="@drawable/ic_cc_checkmark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -31,7 +33,7 @@
             android:layout_marginEnd="28dp"
             android:layout_marginBottom="28dp"
             android:background="@drawable/circle_button"
-            android:src="@drawable/ic_clear"
+            android:src="@drawable/ic_cc_clear"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -58,5 +60,4 @@
             app:layout_constraintVertical_bias="0.561" />
 
     </android.support.constraint.ConstraintLayout>
-
-</android.support.design.widget.CoordinatorLayout>
+</android.support.wear.widget.BoxInsetLayout>

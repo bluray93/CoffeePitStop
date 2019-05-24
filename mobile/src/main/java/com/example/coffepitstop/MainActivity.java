@@ -124,6 +124,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+        finish();
+    }
+
     private void createEndpoint(){
         platformEndpointRequest = new CreatePlatformEndpointRequest();
         platformEndpointRequest.setCustomUserData("CoffeePitStopUser");
