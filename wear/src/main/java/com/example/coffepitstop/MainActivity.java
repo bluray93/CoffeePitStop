@@ -121,8 +121,10 @@ public class MainActivity extends WearableActivity{
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (sharedPreferences.contains("topicName"))
+                if (sharedPreferences.contains("topicName")) {
+                    topicName = Util.getSharedPreferences("topicName", getApplicationContext());
                     settings(v);
+                }
                 else
                     topicsSubscriptions(v);
             }
