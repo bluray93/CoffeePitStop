@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.auth.AWSSessionCredentials;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -103,19 +104,24 @@ public class MainActivity extends WearableActivity{
         final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("BUTTON", "Premuto");
-                // Code here executes on main thread after user presses button
+                if(subscribed) {
+                    Log.d("BUTTON", "Premuto");
+                    // Code here executes on main thread after user presses button
 
-                String topicArn = "arn:aws:sns:us-east-1:341434091225:"+topicName;
-                // Publish a message to an Amazon SNS topic.
-                final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
+                    String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
+                    // Publish a message to an Amazon SNS topic.
+                    final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
 
-                //PublishRequest creates the request that is sent with the next method publish()
-                final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
-                final PublishResult publishResponse = snsClient.publish(publishRequest);
+                    //PublishRequest creates the request that is sent with the next method publish()
+                    final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+                    final PublishResult publishResponse = snsClient.publish(publishRequest);
 
-                // Print the MessageId of the message.
-                System.out.println("MessageId: " + publishResponse.getMessageId());
+                    // Print the MessageId of the message.
+                    System.out.println("MessageId: " + publishResponse.getMessageId());
+                }
+                else{
+                    Toast.makeText(getBaseContext(),"Subscribe to a group first",Toast.LENGTH_LONG).show();
+                }
             }
         });
         final ImageButton settings = findViewById(R.id.settings);
