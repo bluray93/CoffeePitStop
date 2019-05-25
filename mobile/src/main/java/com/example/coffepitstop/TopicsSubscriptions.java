@@ -1,19 +1,14 @@
 package com.example.coffepitstop;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.CreateTopicRequest;
-import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.SubscribeRequest;
 import com.amazonaws.services.sns.model.SubscribeResult;
 
@@ -35,7 +30,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
         Log.d("CLIENT TOPIC",snsClient.getEndpoint());
 
-        editTextTS = (EditText) findViewById(R.id.editTextTS);
+        editTextTS = findViewById(R.id.editTextTS);
 
         final ImageButton accept = findViewById(R.id.AcceptTS);
         accept.setOnClickListener(new View.OnClickListener() {
@@ -46,7 +41,8 @@ public class TopicsSubscriptions extends AppCompatActivity {
                     Log.d("TOPIC CREATION", "Empty topic name");
                 else {
                     Boolean result = subscribeTopic(topicName);
-                    Confirmation(v,result);
+                    Confirmation(result);
+                    finish();
                 }
             }
         });
@@ -60,7 +56,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
 
     }
 
-    public void Confirmation(View view,Boolean result) {
+    public void Confirmation(Boolean result) {
 
         Intent intent = new Intent(this, Confirmation.class);
         intent.putExtra("subscriptionResult",result);

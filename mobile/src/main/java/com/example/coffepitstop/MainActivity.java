@@ -1,18 +1,15 @@
 package com.example.coffepitstop;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -23,7 +20,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
-import com.amazonaws.services.sns.model.DeleteEndpointRequest;
 import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
 import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
 import com.amazonaws.services.sns.model.PublishRequest;
@@ -33,6 +29,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
     private String topicName;
-    private Boolean subscribed = false;
+    private Boolean snsSet = false;
+    private Boolean pushed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,20 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if(sharedPreferences.contains("topicName")){
-            topicName = Util.getSharedPreferences("topicName",getApplicationContext());
-            subscribed = true;
-            Log.d("TOPICNAME",topicName);
-        }
-        else{
-            Log.d("TOPICNAME","non ci sono");
-        }
-
-        if( Build.VERSION.SDK_INT >= 9){
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( new OnSuccessListener<InstanceIdResult>() {
             @Override
@@ -79,36 +65,21 @@ public class MainActivity extends AppCompatActivity {
                 // i.e. store it on SharedPreferences or DB
                 // or directly send it to server
 
-                if(token == null)
-                    Log.d("TOKEN","NULL");
-                else
-                    Log.d("TOKEN",token);
-
-                //setSnsClient();
-                //snsSetup();
-                TestAsyncTask task = new TestAsyncTask();
+                TestAsyncTask task = new TestAsyncTask(MainActivity.this);
                 task.execute(10);
             }
         });
 
-
         final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(subscribed) {
-                    Log.d("BUTTON", "Premuto");
-                    // Code here executes on main thread after user presses button
-
-                    String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
-                    // Publish a message to an Amazon SNS topic.
-                    final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
-
-                    //PublishRequest creates the request that is sent with the next method publish()
-                    final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
-                    final PublishResult publishResponse = snsClient.publish(publishRequest);
-
-                    // Print the MessageId of the message.
-                    System.out.println("MessageId: " + publishResponse.getMessageId());
+                if(sharedPreferences.contains("topicName")) {
+                    if(snsSet){
+                        sendNotification();
+                    }
+                    else{
+                        pushed=true;
+                    }
                 }
                 else{
                     Toast.makeText(getBaseContext(),"Subscribe to a group first",Toast.LENGTH_LONG).show();
@@ -118,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (subscribed)
+                if (sharedPreferences.contains("topicName"))
                     settings(v);
                 else
                     topicsSubscriptions(v);
@@ -127,10 +98,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        finishAffinity();
-        finish();
+    private void sendNotification(){
+        topicName = Util.getSharedPreferences("topicName",getApplicationContext());
+        // Code here executes on main thread after user presses button
+
+        String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
+        // Publish a message to an Amazon SNS topic.
+        final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
+
+        //PublishRequest creates the request that is sent with the next method publish()
+        final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+        final PublishResult publishResponse = snsClient.publish(publishRequest);
+
+        // Print the MessageId of the message.
+        System.out.println("MessageId: " + publishResponse.getMessageId());
     }
 
     private void createEndpoint(){
@@ -173,13 +154,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void snsSetup(){
 
-        //String endpointARN = retrieveEndpointArn();
-
         String endpointARN = Util.getSharedPreferences("endpointArn",getApplicationContext());
         Boolean toUpdate = false;
 
         Log.d("ENDPOINT","is "+ endpointARN);
-
 
         if (endpointARN == null){
 
@@ -239,32 +217,39 @@ public class MainActivity extends AppCompatActivity {
         return snsClient;
     }
 
-    private class TestAsyncTask extends AsyncTask<Integer, Integer, AmazonSNSClient>{
+    private static class TestAsyncTask extends AsyncTask<Integer, Integer, AmazonSNSClient>{
+        private WeakReference<MainActivity> activityWeakReference;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+        TestAsyncTask(MainActivity activity) {
+            activityWeakReference = new WeakReference<>(activity);
         }
 
         @Override
         protected AmazonSNSClient doInBackground(Integer... strings) {
-            setSnsClient();
-            snsSetup();
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return null;
+            }
+            activity.setSnsClient();
+            activity.snsSetup();
             return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
         }
 
         @Override
         protected void onPostExecute(AmazonSNSClient amazonSNSClient) {
             super.onPostExecute(amazonSNSClient);
-            //Toast.makeText(getBaseContext(),"Done",Toast.LENGTH_LONG).show();
-            final ImageButton settings = findViewById(R.id.settings);
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            final ImageButton settings = activity.findViewById(R.id.settings);
             settings.setVisibility(View.VISIBLE);
-
+            if(activity.pushed) {
+                activity.sendNotification();
+                activity.snsSet = true;
+            }
+            else
+                activity.snsSet=true;
         }
 
     }

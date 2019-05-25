@@ -43,7 +43,8 @@ public class Settings extends AppCompatActivity {
                 Util.deleteSharedPreferences("subscriptionArn",getApplicationContext());
                 Util.deleteSharedPreferences("topicName",getApplicationContext());
 
-                startActivity(intent);
+                //startActivity(intent);
+                finish();
             }
 
         });
