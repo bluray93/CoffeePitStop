@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.amazonaws.auth.AWSSessionCredentials;
 import com.amazonaws.auth.CognitoCredentialsProvider;
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if(sharedPreferences.contains("topicName")){
@@ -70,9 +71,6 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
-        //String token = FirebaseInstanceId.getInstance().getToken();
-
-
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
@@ -86,10 +84,10 @@ public class MainActivity extends AppCompatActivity {
                 else
                     Log.d("TOKEN",token);
 
-                //initialSetup();
-
-                setSnsClient();
-                snsSetup();
+                //setSnsClient();
+                //snsSetup();
+                TestAsyncTask task = new TestAsyncTask();
+                task.execute(10);
             }
         });
 
@@ -97,19 +95,24 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("BUTTON", "Premuto");
-                // Code here executes on main thread after user presses button
+                if(subscribed) {
+                    Log.d("BUTTON", "Premuto");
+                    // Code here executes on main thread after user presses button
 
-                String topicArn = "arn:aws:sns:us-east-1:341434091225:"+topicName;
-                // Publish a message to an Amazon SNS topic.
-                final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
+                    String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
+                    // Publish a message to an Amazon SNS topic.
+                    final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
 
-                //PublishRequest creates the request that is sent with the next method publish()
-                final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
-                final PublishResult publishResponse = snsClient.publish(publishRequest);
+                    //PublishRequest creates the request that is sent with the next method publish()
+                    final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+                    final PublishResult publishResponse = snsClient.publish(publishRequest);
 
-                // Print the MessageId of the message.
-                System.out.println("MessageId: " + publishResponse.getMessageId());
+                    // Print the MessageId of the message.
+                    System.out.println("MessageId: " + publishResponse.getMessageId());
+                }
+                else{
+                    Toast.makeText(getBaseContext(),"Subscribe to a group first",Toast.LENGTH_LONG).show();
+                }
             }
         });
         final ImageButton settings = findViewById(R.id.settings);
@@ -138,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
         platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
 
         //We store the newly created endpoint
-        //storeEndpointArn(platformEndpointResult.getEndpointArn());
 
         Util.storeSharedPreferences("endpointArn",platformEndpointResult.getEndpointArn(),getApplicationContext());
 
@@ -237,5 +239,34 @@ public class MainActivity extends AppCompatActivity {
         return snsClient;
     }
 
+    private class TestAsyncTask extends AsyncTask<Integer, Integer, AmazonSNSClient>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected AmazonSNSClient doInBackground(Integer... strings) {
+            setSnsClient();
+            snsSetup();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(AmazonSNSClient amazonSNSClient) {
+            super.onPostExecute(amazonSNSClient);
+            //Toast.makeText(getBaseContext(),"Done",Toast.LENGTH_LONG).show();
+            final ImageButton settings = findViewById(R.id.settings);
+            settings.setVisibility(View.VISIBLE);
+
+        }
+
+    }
 
 }
