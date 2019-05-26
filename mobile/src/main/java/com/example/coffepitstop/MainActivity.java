@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(activity.nfc){
                 activity.processIntent(activity.getIntent());
+                activity.snsSet = true;
             }
             else
                 activity.snsSet=true;
