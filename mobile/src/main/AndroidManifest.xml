@@ -20,13 +20,7 @@
         <activity
             android:name=".Settings"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.Design.NoActionBar">
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="application/vnd.com.example.android.beam"/>
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.Design.NoActionBar"/>
         <activity
             android:name=".Confirmation"
             android:label="@string/title_activity_confirmation"
@@ -34,7 +28,14 @@
         <activity
             android:name=".TopicsSubscriptions"
             android:label="@string/title_activity_topics_subscriptions"
-            android:theme="@style/Theme.Design.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.com.example.android.beam"/>
+            </intent-filter>
+    </activity>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,6 +44,7 @@
 
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
+
         </activity>
 
         <service
