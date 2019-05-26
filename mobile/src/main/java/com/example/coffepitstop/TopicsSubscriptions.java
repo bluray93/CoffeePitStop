@@ -44,7 +44,7 @@ public class TopicsSubscriptions extends AppCompatActivity {
                 if (topicName.equals(""))
                     Log.d("TOPIC CREATION", "Empty topic name");
                 else {
-                    Boolean result = subscribeTopic(topicName);
+                    Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
                     Confirmation(result);
                     finish();
                 }
@@ -70,66 +70,6 @@ public class TopicsSubscriptions extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private boolean subscribeTopic(String topicName){
-
-        try {
-
-            //Tries to subscribe to the topic with the given name
-            //If the topic does not exists the NotFoundException is thrown
-
-            final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", Util.getSharedPreferences("endpointArn",getApplicationContext()));
-
-            SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
-            Log.d("SubARN",subscribeResult.getSubscriptionArn());
-            Util.storeSharedPreferences("subscriptionArn",subscribeResult.getSubscriptionArn(),getApplicationContext());
-            Log.d("SUBSCRIBE RESULT", "Subscribe done");
-            return true;
 
 
-        } catch (com.amazonaws.services.sns.model.NotFoundException e){
-
-            //In this case, the topic with the initial name is created
-            //createTopic(topicName);
-            Log.d("SUBSCRIBE RESULT", "CreateTopic done");
-
-            return false;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Check to see that the Activity started due to an Android Beam
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-            Log.d("AOOO", "Connection received.");
-            processIntent(getIntent());
-        }
-    }
-
-    void processIntent(Intent intent) {
-        Log.d("AOOO", "Process intent received.");
-
-        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-        // only one message sent during the beam
-        NdefMessage msg = (NdefMessage) rawMsgs[0];
-        // record 0 contains the MIME type, record 1 is the AAR, if present
-
-        topicName = new String(msg.getRecords()[0].getPayload());
-        Log.d("AOOO",topicName + " è il messaggio");
-
-        Boolean result = subscribeTopic(topicName);
-        Confirmation(result);
-        
-        Intent i=new Intent(this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
-
-
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        // onResume gets called after this to handle the intent
-        setIntent(intent);
-    }
 }

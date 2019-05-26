@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private String topicName;
     private Boolean snsSet = false;
     private Boolean pushed = false;
+    private Boolean nfc = false;
+    private String topicArnPrefix = "arn:aws:sns:us-east-1:341434091225:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,10 +253,55 @@ public class MainActivity extends AppCompatActivity {
                 activity.sendNotification();
                 activity.snsSet = true;
             }
+            else if(activity.nfc){
+                activity.processIntent(activity.getIntent());
+            }
             else
                 activity.snsSet=true;
         }
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Check to see that the Activity started due to an Android Beam
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Log.d("AOOO", "Connection received.");
+            //processIntent(getIntent());
+            nfc=true;
+        }
+    }
+
+    void processIntent(Intent intent) {
+        Log.d("AOOO", "Process intent received.");
+
+        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        // only one message sent during the beam
+        NdefMessage msg = (NdefMessage) rawMsgs[0];
+        // record 0 contains the MIME type, record 1 is the AAR, if present
+
+        topicName = new String(msg.getRecords()[0].getPayload());
+        Log.d("AOOO",topicName + " è il messaggio");
+
+        Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
+        Confirmation(result);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        // onResume gets called after this to handle the intent
+        setIntent(intent);
+    }
+
+    public void Confirmation(Boolean result) {
+
+        Intent intent = new Intent(this, Confirmation.class);
+        intent.putExtra("subscriptionResult",result);
+        intent.putExtra("topicArnPrefix",topicArnPrefix);
+        intent.putExtra("topicName", topicName);
+
+        startActivity(intent);
     }
 
 }
