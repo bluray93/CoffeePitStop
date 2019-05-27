@@ -8,6 +8,7 @@ import android.util.Log;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.SubscribeRequest;
 import com.amazonaws.services.sns.model.SubscribeResult;
+import com.amazonaws.services.sns.model.UnsubscribeRequest;
 
 public class Util {
 
@@ -52,10 +53,26 @@ public class Util {
         } catch (com.amazonaws.services.sns.model.NotFoundException e){
 
             //In this case, the topic with the initial name is created
-            //createTopic(topicName);
-            Log.d("SUBSCRIBE RESULT", "CreateTopic done");
+            Log.d("SUBSCRIBE RESULT", "Error subscribing");
 
             return false;
+        }
+    }
+
+    static void unsubscribe(Boolean subscriptionResult, Context context){
+        AmazonSNSClient snsClient = MainActivity.getSnsClient();
+
+        if (snsClient == null)
+            Log.d("CLIENT SNS", "CLIENT NULLO");
+        if (subscriptionResult){
+
+            UnsubscribeRequest unsubscribeRequest = new UnsubscribeRequest(Util.getSharedPreferences("subscriptionArn",context));
+            snsClient.unsubscribe(unsubscribeRequest);
+            Log.d("Unsibscribe","Unsibscribed");
+
+            //Delete shared preferences
+
+            Util.deleteSharedPreferences("subscriptionArn",context);
         }
     }
 }

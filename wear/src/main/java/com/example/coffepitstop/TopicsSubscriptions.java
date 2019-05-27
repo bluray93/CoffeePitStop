@@ -24,16 +24,13 @@ public class TopicsSubscriptions extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_topics_subscriptions);
 
-        // Enables Always-on
-        setAmbientEnabled();
-
         //TODO: retrieve client from intent
 
         snsClient = MainActivity.getSnsClient();
 
         Log.d("CLIENT TOPIC",snsClient.getEndpoint());
 
-        editTextTS = (EditText) findViewById(R.id.editTextTS);
+        editTextTS = findViewById(R.id.editTextTS);
 
         final ImageButton accept = findViewById(R.id.acceptTS);
         accept.setOnClickListener(new View.OnClickListener() {
@@ -43,8 +40,8 @@ public class TopicsSubscriptions extends WearableActivity {
                 if (topicName.equals(""))
                     Log.d("TOPIC CREATION", "Empty topic name");
                 else {
-                    Boolean result = subscribeTopic(topicName);
-                    Confirmation(v,result);
+                    Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
+                    Confirmation(result);
                     finish();
                 }
             }
@@ -59,7 +56,7 @@ public class TopicsSubscriptions extends WearableActivity {
 
     }
 
-    public void Confirmation(View view,Boolean result) {
+    public void Confirmation(Boolean result) {
 
         Intent intent = new Intent(this, Confirmation.class);
         intent.putExtra("subscriptionResult",result);
@@ -67,31 +64,5 @@ public class TopicsSubscriptions extends WearableActivity {
         intent.putExtra("topicName", topicName);
 
         startActivity(intent);
-    }
-
-    private boolean subscribeTopic(String topicName){
-
-        try {
-
-            //Tries to subscribe to the topic with the given name
-            //If the topic does not exists the NotFoundException is thrown
-
-            final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix + topicName, "application", Util.getSharedPreferences("endpointArn",getApplicationContext()));
-
-            SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
-            Log.d("SubARN",subscribeResult.getSubscriptionArn());
-            Util.storeSharedPreferences("subscriptionArn",subscribeResult.getSubscriptionArn(),getApplicationContext());
-            Log.d("SUBSCRIBE RESULT", "Subscribe done");
-            return true;
-
-
-        } catch (com.amazonaws.services.sns.model.NotFoundException e){
-
-            //In this case, the topic with the initial name is created
-            //createTopic(topicName);
-            Log.d("SUBSCRIBE RESULT", "CreateTopic done");
-
-            return false;
-        }
     }
 }

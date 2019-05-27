@@ -269,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
         // Check to see that the Activity started due to an Android Beam
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d("AOOO", "Connection received.");
-            //processIntent(getIntent());
             nfc=true;
         }
     }
@@ -286,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("AOOO",topicName + " è il messaggio");
 
         Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
-        Confirmation(result);
+        Confirmation(result, true);
     }
 
     @Override
@@ -295,13 +294,11 @@ public class MainActivity extends AppCompatActivity {
         setIntent(intent);
     }
 
-    public void Confirmation(Boolean result) {
-
+    public void Confirmation(Boolean result, Boolean nfc) {
         Intent intent = new Intent(this, Confirmation.class);
         intent.putExtra("subscriptionResult",result);
-        intent.putExtra("topicArnPrefix",topicArnPrefix);
         intent.putExtra("topicName", topicName);
-
+        intent.putExtra("nfc", nfc);
         startActivity(intent);
     }
 

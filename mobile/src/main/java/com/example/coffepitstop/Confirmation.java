@@ -12,11 +12,10 @@ import android.widget.Toast;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.CreateTopicRequest;
 import com.amazonaws.services.sns.model.CreateTopicResult;
-import com.amazonaws.services.sns.model.SubscribeRequest;
-import com.amazonaws.services.sns.model.SubscribeResult;
-import com.amazonaws.services.sns.model.UnsubscribeRequest;
 
 public class Confirmation extends AppCompatActivity {
+
+    private Boolean subscriptionResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,15 +24,18 @@ public class Confirmation extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        final boolean subscriptionResult = intent.getBooleanExtra("subscriptionResult",true);
-        final String topicArnPrefix = intent.getStringExtra("topicArnPrefix");
+        subscriptionResult = intent.getBooleanExtra("subscriptionResult",false);
         final String topicName = intent.getStringExtra("topicName");
-        final String endpointArn = Util.getSharedPreferences("endpointArn",getApplicationContext());
+        final Boolean nfc = intent.getBooleanExtra("nfc",false);
 
         TextView textViewC = findViewById(R.id.TextViewC);
 
-        if (subscriptionResult)
-            textViewC.setText("Do you want\nto subscribe?");
+        if (subscriptionResult) {
+            if (nfc)
+                textViewC.setText("Already subscribed to a different group\ndo you want overwrite?");
+            else
+                textViewC.setText("Do you want\nto subscribe?");
+        }
         else
             textViewC.setText("Group not found.\nCreate Group?");
 
@@ -47,21 +49,26 @@ public class Confirmation extends AppCompatActivity {
                     finish();
                 }
 
+                else if(nfc){
+                    Util.unsubscribe(subscriptionResult,getApplicationContext());
+                    Util.subscribeTopic(topicName, MainActivity.getSnsClient(),getApplicationContext());
+                    Toast.makeText(getBaseContext(), "Sub. Success.", Toast.LENGTH_LONG).show();
+                    Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
+                }
+
                 else{
                     AmazonSNSClient snsClient = MainActivity.getSnsClient();
 
                     try {
-
                         //Tries to subscribe to the topic with the given name
                         //If the topic does not exists the NotFoundException is thrown
                         final CreateTopicRequest createTopicRequest = new CreateTopicRequest(topicName);
                         final CreateTopicResult createTopicResult = snsClient.createTopic(createTopicRequest);
-                        final SubscribeRequest subscribeRequest = new SubscribeRequest(topicArnPrefix+topicName, "application", endpointArn);
-                        SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
-                        Log.d("SUBSCRIBE RESULT", "Subscribe done");
+
+                        Util.subscribeTopic(topicName, snsClient,getApplicationContext());
+
                         Toast.makeText(getBaseContext(),"Group created.",Toast.LENGTH_LONG).show();
                         Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
-                        Util.storeSharedPreferences("subscriptionArn",subscribeResult.getSubscriptionArn(),getApplicationContext());
                         finish();
 
                     } catch (com.amazonaws.services.sns.model.NotFoundException e){
@@ -78,25 +85,12 @@ public class Confirmation extends AppCompatActivity {
         final ImageButton deny = findViewById(R.id.DenyC);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                AmazonSNSClient snsClient = MainActivity.getSnsClient();
-
-                if (snsClient == null)
-                    Log.d("CLIENT SNS", "CLIENT NULLO");
-                if (subscriptionResult){
-
-                    UnsubscribeRequest unsubscribeRequest = new UnsubscribeRequest(Util.getSharedPreferences("subscriptionArn",getApplicationContext()));
-                    snsClient.unsubscribe(unsubscribeRequest);
-                    Log.d("Unsibscribe","Unsibscribed");
-
-                    //Delete shared preferences
-
-                    Util.deleteSharedPreferences("subscriptionArn",getApplicationContext());
-                }
-
+                Util.unsubscribe(subscriptionResult,getApplicationContext());
                 finish();
             }
         });
     }
+
 
 
 }

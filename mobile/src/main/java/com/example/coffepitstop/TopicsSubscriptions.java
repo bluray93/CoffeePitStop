@@ -64,6 +64,4 @@ public class TopicsSubscriptions extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-
 }

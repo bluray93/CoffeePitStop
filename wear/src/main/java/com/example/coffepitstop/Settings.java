@@ -1,55 +1,78 @@
 package com.example.coffepitstop;
 
 import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.services.sns.model.UnsubscribeRequest;
 
-public class Settings extends WearableActivity {
+import static android.nfc.NdefRecord.createMime;
+
+public class Settings extends WearableActivity implements NfcAdapter.CreateNdefMessageCallback {
 
     private TextView textViewS;
+    private NfcAdapter nfcAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        // Enables Always-on
-        setAmbientEnabled();
-
-        textViewS = (TextView) findViewById(R.id.TextViewS);
+        textViewS = findViewById(R.id.TextViewS);
 
         textViewS.setText("Do you want\nto unsubscribe?");
-
-        final Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 
         final ImageButton accept = findViewById(R.id.AcceptS);
         accept.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                UnsubscribeRequest unsubscribeRequest = new UnsubscribeRequest(Util.getSharedPreferences("subscriptionArn",getApplicationContext()));
-                MainActivity.getSnsClient().unsubscribe(unsubscribeRequest);
-                Log.d("Unsubscribe","Unsibscribed");
+                Util.unsubscribe(true,getApplicationContext());
 
-                //Delete shared preferences
-
-                Util.deleteSharedPreferences("subscriptionArn",getApplicationContext());
                 Util.deleteSharedPreferences("topicName",getApplicationContext());
 
-                //startActivity(intent);
                 finish();
             }
 
         });
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
         final ImageButton deny = findViewById(R.id.DenyS);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
+                if (nfcAdapter == null) {
+                    Toast.makeText(getBaseContext(), "NFC is not available", Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
+                }
+                // Register callback
+                nfcAdapter.setNdefPushMessageCallback(Settings.this, Settings.this);
+
                 finish();
             }
         });
+
+
+
+
+
+    }
+
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+
+        Log.d("NFC", "Message created.");
+        String msgToBeam = Util.getSharedPreferences("topicName", getApplicationContext());
+
+        return new NdefMessage( new NdefRecord[] { createMime( "application/vnd.com.example.android.beam", msgToBeam.getBytes())});
     }
 }

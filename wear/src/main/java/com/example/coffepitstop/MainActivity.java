@@ -3,8 +3,12 @@ package com.example.coffepitstop;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.wearable.activity.WearableActivity;
@@ -29,6 +33,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,36 +46,20 @@ public class MainActivity extends WearableActivity{
     private CreatePlatformEndpointRequest platformEndpointRequest;
     private CreatePlatformEndpointResult platformEndpointResult;
     private String topicName;
-    private Boolean subscribed = false;
-
+    private Boolean snsSet = false;
+    private Boolean pushed = false;
+    private Boolean nfc = false;
+    private String topicArnPrefix = "arn:aws:sns:us-east-1:341434091225:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Enables Always-on
-        setAmbientEnabled();
-
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if(sharedPreferences.contains("topicName")){
-            topicName = Util.getSharedPreferences("topicName",getApplicationContext());
-            subscribed = true;
-            Log.d("TOPICNAME",topicName);
-        }
-        else{
-            Log.d("TOPICNAME","non ci sono");
-        }
-
-        if( Build.VERSION.SDK_INT >= 9){
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-            StrictMode.setThreadPolicy(policy);
-        }
-
-        //String token = FirebaseInstanceId.getInstance().getToken();
-
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( new OnSuccessListener<InstanceIdResult>() {
             @Override
@@ -80,36 +69,21 @@ public class MainActivity extends WearableActivity{
                 // i.e. store it on SharedPreferences or DB
                 // or directly send it to server
 
-                if(token == null)
-                    Log.d("TOKEN","NULL");
-                else
-                    Log.d("TOKEN",token);
-
-                //initialSetup();
-
-                setSnsClient();
-                snsSetup();
+                TestAsyncTask task = new TestAsyncTask(MainActivity.this);
+                task.execute(10);
             }
         });
-
 
         final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(subscribed) {
-                    Log.d("BUTTON", "Premuto");
-                    // Code here executes on main thread after user presses button
-
-                    String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
-                    // Publish a message to an Amazon SNS topic.
-                    final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
-
-                    //PublishRequest creates the request that is sent with the next method publish()
-                    final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
-                    final PublishResult publishResponse = snsClient.publish(publishRequest);
-
-                    // Print the MessageId of the message.
-                    System.out.println("MessageId: " + publishResponse.getMessageId());
+                if(sharedPreferences.contains("topicName")) {
+                    if(snsSet){
+                        sendNotification();
+                    }
+                    else{
+                        pushed=true;
+                    }
                 }
                 else{
                     Toast.makeText(getBaseContext(),"Subscribe to a group first",Toast.LENGTH_LONG).show();
@@ -119,15 +93,29 @@ public class MainActivity extends WearableActivity{
         final ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (sharedPreferences.contains("topicName")) {
-                    topicName = Util.getSharedPreferences("topicName", getApplicationContext());
+                if (sharedPreferences.contains("topicName"))
                     settings(v);
-                }
                 else
                     topicsSubscriptions(v);
             }
         });
 
+    }
+
+    private void sendNotification(){
+        topicName = Util.getSharedPreferences("topicName",getApplicationContext());
+        // Code here executes on main thread after user presses button
+
+        String topicArn = "arn:aws:sns:us-east-1:341434091225:" + topicName;
+        // Publish a message to an Amazon SNS topic.
+        final String msg = "If you receive this message, publishing a message to an Amazon SNS topic works.";
+
+        //PublishRequest creates the request that is sent with the next method publish()
+        final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+        final PublishResult publishResponse = snsClient.publish(publishRequest);
+
+        // Print the MessageId of the message.
+        System.out.println("MessageId: " + publishResponse.getMessageId());
     }
 
     private void createEndpoint(){
@@ -138,7 +126,6 @@ public class MainActivity extends WearableActivity{
         platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
 
         //We store the newly created endpoint
-        //storeEndpointArn(platformEndpointResult.getEndpointArn());
 
         Util.storeSharedPreferences("endpointArn",platformEndpointResult.getEndpointArn(),getApplicationContext());
 
@@ -171,13 +158,10 @@ public class MainActivity extends WearableActivity{
 
     private void snsSetup(){
 
-        //String endpointARN = retrieveEndpointArn();
-
         String endpointARN = Util.getSharedPreferences("endpointArn",getApplicationContext());
         Boolean toUpdate = false;
 
         Log.d("ENDPOINT","is "+ endpointARN);
-
 
         if (endpointARN == null){
 
@@ -217,6 +201,7 @@ public class MainActivity extends WearableActivity{
     /** Called when the user taps the Settings button */
     public void topicsSubscriptions(View view) {
         Intent intent = new Intent(this, TopicsSubscriptions.class);
+
         intent.putExtra("endpointArn", Util.getSharedPreferences("endpointArn",getApplicationContext()));
         Log.d("CLIENT MAIN",snsClient.getEndpoint());
 
@@ -234,6 +219,86 @@ public class MainActivity extends WearableActivity{
 
     public static AmazonSNSClient getSnsClient(){
         return snsClient;
+    }
+
+    private static class TestAsyncTask extends AsyncTask<Integer, Integer, AmazonSNSClient> {
+        private WeakReference<MainActivity> activityWeakReference;
+
+        TestAsyncTask(MainActivity activity) {
+            activityWeakReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected AmazonSNSClient doInBackground(Integer... strings) {
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return null;
+            }
+            activity.setSnsClient();
+            activity.snsSetup();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(AmazonSNSClient amazonSNSClient) {
+            super.onPostExecute(amazonSNSClient);
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            final ImageButton settings = activity.findViewById(R.id.settings);
+            settings.setVisibility(View.VISIBLE);
+            if(activity.pushed) {
+                activity.sendNotification();
+                activity.snsSet = true;
+            }
+            else if(activity.nfc){
+                activity.processIntent(activity.getIntent());
+                activity.snsSet = true;
+            }
+            else
+                activity.snsSet=true;
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Check to see that the Activity started due to an Android Beam
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Log.d("AOOO", "Connection received.");
+            nfc=true;
+        }
+    }
+
+    void processIntent(Intent intent) {
+        Log.d("AOOO", "Process intent received.");
+
+        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        // only one message sent during the beam
+        NdefMessage msg = (NdefMessage) rawMsgs[0];
+        // record 0 contains the MIME type, record 1 is the AAR, if present
+
+        topicName = new String(msg.getRecords()[0].getPayload());
+        Log.d("AOOO",topicName + " è il messaggio");
+
+        Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
+        Confirmation(result, true);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        // onResume gets called after this to handle the intent
+        setIntent(intent);
+    }
+
+    public void Confirmation(Boolean result, Boolean nfc) {
+        Intent intent = new Intent(this, Confirmation.class);
+        intent.putExtra("subscriptionResult",result);
+        intent.putExtra("topicName", topicName);
+        intent.putExtra("nfc", nfc);
+        startActivity(intent);
     }
 }
 
