@@ -3,7 +3,10 @@ package com.example.coffepitstop;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
@@ -39,6 +42,16 @@ public class FirebaseService extends FirebaseMessagingService {
 
         }
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,NOTIFICATION_CHANNEL_ID);
+
+        // Create an Intent for the activity you want to start
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        // Create the TaskStackBuilder and add the intent, which inflates the back stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        // Get the PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
         notificationBuilder.setDefaults(Notification.DEFAULT_ALL).setSmallIcon(R.drawable.ic_coffee).setContentTitle(title).setContentText(body);
         notificationBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 }).setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
 
