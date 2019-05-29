@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -36,8 +38,10 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.nfc.NdefRecord.createMime;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements NfcAdapter.CreateNdefMessageCallback {
 
 
     private CognitoCredentialsProvider credentialsProvider;
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean snsSet = false;
     private Boolean pushed = false;
     private Boolean nfc = false;
-    private String topicArnPrefix = "arn:aws:sns:us-east-1:341434091225:";
+    private NfcAdapter nfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +78,16 @@ public class MainActivity extends AppCompatActivity {
                 task.execute(10);
             }
         });
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        if (nfcAdapter == null) {
+            //Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
+        }
+        else{
+            // Register callback
+            nfcAdapter.setNdefPushMessageCallback(this, this);
+        }
 
         final ImageButton button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -211,10 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void settings(View view) {
         Intent intent = new Intent(this, Settings.class);
-
-        //intent.putExtra("endpointArn", retrieveEndpointArn());
-        //Log.d("CLIENT MAIN",snsClient.getEndpoint());
-
         startActivity(intent);
     }
 
@@ -300,6 +310,15 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("topicName", topicName);
         intent.putExtra("nfc", nfc);
         startActivity(intent);
+    }
+
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+
+        Log.d("NFC", "Message created.");
+        String msgToBeam = Util.getSharedPreferences("topicName", getApplicationContext());
+
+        return new NdefMessage( new NdefRecord[] { createMime( "application/vnd.com.example.android.beam", msgToBeam.getBytes())});
     }
 
 }
