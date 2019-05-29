@@ -55,13 +55,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Create
     private Boolean pushed = false;
     private Boolean nfc = false;
     private NfcAdapter nfcAdapter;
-
+    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -295,7 +296,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Create
         Log.d("AOOO",topicName + " è il messaggio");
 
         Boolean result = Util.subscribeTopic(topicName, snsClient,getApplicationContext());
-        Confirmation(result, true);
+
+        Log.d("SUBRESULT","is " + result);
+        Confirmation(result, sharedPreferences.contains("topicName"));
     }
 
     @Override
