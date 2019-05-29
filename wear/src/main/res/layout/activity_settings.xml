@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_grey"
+    android:background="@color/black"
     android:padding="@dimen/box_inset_layout_padding"
     tools:context=".Settings"
     tools:deviceIds="wear">
@@ -33,7 +33,7 @@
             android:layout_marginEnd="28dp"
             android:layout_marginBottom="28dp"
             android:background="@drawable/circle_button"
-            android:src="@drawable/ic_nfc"
+            android:src="@drawable/ic_cc_clear"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"

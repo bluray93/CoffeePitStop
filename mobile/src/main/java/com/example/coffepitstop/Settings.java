@@ -42,23 +42,20 @@ public class Settings extends AppCompatActivity implements CreateNdefMessageCall
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
+        if (nfcAdapter == null) {
+            //Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
+        }
+        else{
+            // Register callback
+            nfcAdapter.setNdefPushMessageCallback(this, this);
+        }
+
         final ImageButton deny = findViewById(R.id.DenyS);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 finish();
             }
         });
-
-
-
-        if (nfcAdapter == null) {
-            Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
-        // Register callback
-        nfcAdapter.setNdefPushMessageCallback(this, this);
-
     }
 
     @Override

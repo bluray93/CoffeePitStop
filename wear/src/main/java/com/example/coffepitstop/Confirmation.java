@@ -29,14 +29,11 @@ public class Confirmation extends WearableActivity {
 
         subscriptionResult = intent.getBooleanExtra("subscriptionResult",true);
         final String topicName = intent.getStringExtra("topicName");
-        final Boolean nfc = intent.getBooleanExtra("nfc",false);
 
         TextView textViewC = findViewById(R.id.TextViewC);
 
         if (subscriptionResult)
             textViewC.setText("Do you want\nto subscribe?");
-        else if (nfc)
-            textViewC.setText("Already subscribed to a different group\ndo you want overwrite?");
         else
             textViewC.setText("Group not found.\nCreate Group?");
 
@@ -49,14 +46,6 @@ public class Confirmation extends WearableActivity {
                     Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
                     finish();
                 }
-
-                else if(nfc){
-                    Util.unsubscribe(subscriptionResult,getApplicationContext());
-                    Util.subscribeTopic(topicName, MainActivity.getSnsClient(),getApplicationContext());
-                    Toast.makeText(getBaseContext(), "Sub. Success.", Toast.LENGTH_LONG).show();
-                    Util.storeSharedPreferences("topicName",topicName,getApplicationContext());
-                }
-
                 else{
                     AmazonSNSClient snsClient = MainActivity.getSnsClient();
 

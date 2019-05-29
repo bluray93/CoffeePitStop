@@ -17,10 +17,9 @@ import com.amazonaws.services.sns.model.UnsubscribeRequest;
 
 import static android.nfc.NdefRecord.createMime;
 
-public class Settings extends WearableActivity implements NfcAdapter.CreateNdefMessageCallback {
+public class Settings extends WearableActivity {
 
     private TextView textViewS;
-    private NfcAdapter nfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,36 +42,11 @@ public class Settings extends WearableActivity implements NfcAdapter.CreateNdefM
 
         });
 
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-
         final ImageButton deny = findViewById(R.id.DenyS);
         deny.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                if (nfcAdapter == null) {
-                    Toast.makeText(getBaseContext(), "NFC is not available", Toast.LENGTH_LONG).show();
-                    finish();
-                    return;
-                }
-                // Register callback
-                nfcAdapter.setNdefPushMessageCallback(Settings.this, Settings.this);
-
                 finish();
             }
         });
-
-
-
-
-
-    }
-
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
-
-        Log.d("NFC", "Message created.");
-        String msgToBeam = Util.getSharedPreferences("topicName", getApplicationContext());
-
-        return new NdefMessage( new NdefRecord[] { createMime( "application/vnd.com.example.android.beam", msgToBeam.getBytes())});
     }
 }

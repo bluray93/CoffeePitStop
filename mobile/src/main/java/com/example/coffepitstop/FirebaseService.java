@@ -61,7 +61,7 @@ public class FirebaseService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        showNotification("CoffeePitStop","Kaffeeee???");
+        showNotification("CoffeePitStop","You need a coffee");
 
         // ...
 
